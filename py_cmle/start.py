@@ -5,20 +5,12 @@ import tempfile
 import os
 import sys
 
-DEFAULT_STD = sys.stderr
 
-
-def execute_command(command, stdout=None, stderr=None):
+def execute_command(command):
     if not command:
         raise ValueError('command is empty')
-    stdout = stdout or DEFAULT_STD
-    stderr = stderr or DEFAULT_STD
     logging.info('Running command: %s', ' '.join(command))
-    proc = subprocess.Popen(command, stdout=stdout, stderr=stderr)
-    proc.wait()
-    if proc.returncode != 0:
-        raise Exception('Error executing: %s, with error code: %s' %
-                        (command, proc.returncode))
+    subprocess.check_call(command)
 
 
 def download_package(uri):
