@@ -46,26 +46,29 @@ def exectue_module(module_name, args):
     execute_command(module_command)
 
 
-def main(args, unknown):
-    package_uris = filter(None, args.package_uris.split(','))
-    for package_uri in package_uris:
-        local_uri = download_package(package_uri)
-        install_package(local_uri)
-
-    if args.module_name:
-        exectue_module(args.module_name, unknown)
-
-
-if __name__ == "__main__":
+def main():
     import logging
     logging.getLogger().setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser(
         'Python based Cloud Machine Learning Engine - boot service')
-    parser.add_argument('--package_uris', type=str, default='')
-    parser.add_argument('--module_name', type=str)
+    parser.add_argument('--package_uris', type=str, default='',
+                        help='Package uris in gcs, seperated by semicomma')
+    parser.add_argument('--module_name', type=str, help='entry moudule names')
     args, unknown = parser.parse_known_args()
     with tempfile.TemporaryDirectory() as directory:
         logging.info('Set working dir: %s', directory)
         os.chdir(directory)
-        main(args, unknown)
+        package_uris = filter(None, args.package_uris.split(','))
+        for package_uri in package_uris:
+            local_uri = download_package(package_uri)
+            install_package(local_uri)
+
+        if args.module_name:
+            exectue_module(args.module_name, unknown)
+        else:
+            logging.info('There is nothing here, please ask for --help')
+
+
+if __name__ == "__main__":
+    main()
