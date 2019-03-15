@@ -4,6 +4,8 @@ import logging
 import tempfile
 import os
 import sys
+import contextlib
+import shutil
 
 
 def execute_command(command):
@@ -38,6 +40,18 @@ def exectue_module(module_name, args):
     execute_command(module_command)
 
 
+@contextlib.contextmanager
+def temp_folder():
+    curdir = os.getcwd()
+    temp = tempfile.mkdtemp()
+    try:
+        os.chdir(temp)
+        yield temp
+    finally:
+        shutil.rmtree(temp, ignore_errors=True)
+        os.chdir(curdir)
+
+
 def main():
     import logging
     logging.getLogger().setLevel(logging.INFO)
@@ -48,7 +62,7 @@ def main():
                         help='Package uris in gcs, seperated by semicomma')
     parser.add_argument('--module_name', type=str, help='entry moudule names')
     args, unknown = parser.parse_known_args()
-    with tempfile.TemporaryDirectory() as directory:
+    with temp_folder() as directory:
         logging.info('Set working dir: %s', directory)
         os.chdir(directory)
         package_uris = filter(None, args.package_uris.split(','))
